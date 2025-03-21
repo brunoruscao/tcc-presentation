@@ -1,0 +1,1025 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Automatização de Apresentações de Slides</title>
+    <style>
+        :root {
+            --primary-color: #3498db;
+            --secondary-color: #2980b9;
+            --accent-color: #e74c3c;
+            --light-color: #ecf0f1;
+            --dark-color: #2c3e50;
+            --success-color: #2ecc71;
+        }
+        
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background-color: #f9f9f9;
+            padding: 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 20px;
+            background-color: var(--dark-color);
+            color: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+        
+        .tabs {
+            display: flex;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
+            border-bottom: 2px solid var(--primary-color);
+        }
+        
+        .tab-button {
+            padding: 12px 24px;
+            background-color: #e0e0e0;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            border-top-left-radius: 8px;
+            border-top-right-radius: 8px;
+            margin-right: 5px;
+        }
+        
+        .tab-button:hover {
+            background-color: #d0d0d0;
+        }
+        
+        .tab-button.active {
+            background-color: var(--primary-color);
+            color: white;
+        }
+        
+        .tab-content {
+            display: none;
+            padding: 25px;
+            background-color: white;
+            border-radius: 0 0 8px 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            margin-bottom: 30px;
+        }
+        
+        .tab-content.active {
+            display: block;
+            animation: fadeIn 0.5s ease-in-out;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        h2 {
+            color: var(--dark-color);
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid var(--light-color);
+        }
+        
+        h3 {
+            color: var(--secondary-color);
+            margin: 20px 0 15px;
+        }
+        
+        p {
+            margin-bottom: 15px;
+        }
+        
+        .prompt-container {
+            background-color: #f7f9fb;
+            border-left: 4px solid var(--primary-color);
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 0 8px 8px 0;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+            position: relative;
+        }
+        
+        .prompt-container h3 {
+            margin-top: 0;
+            color: var(--dark-color);
+        }
+        
+        .hidden {
+            display: none;
+        }
+        
+        .prompt-button {
+            display: inline-block;
+            padding: 10px 20px;
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 600;
+            margin-top: 10px;
+            transition: all 0.3s ease;
+        }
+        
+        .prompt-button:hover {
+            background-color: var(--secondary-color);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0, 0, 0, 0.7);
+        }
+        
+        .modal-content {
+            background-color: #fefefe;
+            margin: 5% auto;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            width: 80%;
+            max-width: 900px;
+            max-height: 80vh;
+            overflow-y: auto;
+            position: relative;
+        }
+        
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .close:hover {
+            color: var(--accent-color);
+        }
+        
+        .steps-container {
+            margin: 20px 0;
+        }
+        
+        .step {
+            padding: 15px;
+            margin-bottom: 15px;
+            border-radius: 8px;
+            background-color: #f8f9fa;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
+        
+        .tool-section {
+            display: none;
+            padding: 20px;
+            background-color: #f9f9f9;
+            border-radius: 8px;
+            margin-top: 10px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
+        
+        .tool-button {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-right: 10px;
+            margin-bottom: 10px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        
+        .tool-button:hover {
+            background-color: var(--secondary-color);
+        }
+        
+        .tool-button.active {
+            background-color: var(--dark-color);
+        }
+        
+        .tool-content {
+            margin-top: 15px;
+        }
+        
+        footer {
+            text-align: center;
+            margin-top: 40px;
+            padding: 20px;
+            background-color: var(--dark-color);
+            color: white;
+            border-radius: 8px;
+        }
+        
+        /* Links */
+        a {
+            color: var(--primary-color);
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+        
+        a:hover {
+            color: var(--secondary-color);
+            text-decoration: underline;
+        }
+        
+        /* Responsive */
+        @media (max-width: 768px) {
+            .tabs {
+                flex-direction: column;
+            }
+            
+            .tab-button {
+                width: 100%;
+                margin-bottom: 5px;
+                border-radius: 4px;
+            }
+            
+            .modal-content {
+                width: 95%;
+                margin: 10% auto;
+            }
+        }
+    </style>
+    <script>
+        // Função para alternar entre abas
+        function openTab(evt, tabName) {
+            // Ocultar todos os conteúdos de abas
+            var tabContents = document.getElementsByClassName("tab-content");
+            for (var i = 0; i < tabContents.length; i++) {
+                tabContents[i].classList.remove("active");
+            }
+            
+            // Remover a classe "active" de todos os botões
+            var tabButtons = document.getElementsByClassName("tab-button");
+            for (var i = 0; i < tabButtons.length; i++) {
+                tabButtons[i].classList.remove("active");
+            }
+            
+            // Mostrar a aba atual e adicionar a classe "active" ao botão clicado
+            document.getElementById(tabName).classList.add("active");
+            evt.currentTarget.classList.add("active");
+        }
+        
+        // Função para abrir modal
+        function openModal(modalId) {
+            document.getElementById(modalId).style.display = "block";
+        }
+        
+        // Função para fechar modal
+        function closeModal(modalId) {
+            document.getElementById(modalId).style.display = "none";
+        }
+        
+        // Função para mostrar conteúdo de ferramentas
+        function showToolContent(contentId) {
+            var toolContents = document.getElementsByClassName("tool-section");
+            for (var i = 0; i < toolContents.length; i++) {
+                toolContents[i].style.display = "none";
+            }
+            
+            var toolButtons = document.getElementsByClassName("tool-button");
+            for (var i = 0; i < toolButtons.length; i++) {
+                toolButtons[i].classList.remove("active");
+            }
+            
+            document.getElementById(contentId).style.display = "block";
+            document.getElementById(contentId + "-btn").classList.add("active");
+        }
+        
+        // Fechar modal quando o usuário clicar fora dele
+        window.onclick = function(event) {
+            var modals = document.getElementsByClassName("modal");
+            for (var i = 0; i < modals.length; i++) {
+                if (event.target == modals[i]) {
+                    modals[i].style.display = "none";
+                }
+            }
+        }
+    </script>
+</head>
+<body>
+    <header>
+        <h1>Automatização de Apresentações de Slides</h1>
+    </header>
+    
+    <div class="tabs">
+        <button class="tab-button active" onclick="openTab(event, 'home')">Home</button>
+        <button class="tab-button" onclick="openTab(event, 'desk-research')">1. Levantamento Inicial</button>
+        <button class="tab-button" onclick="openTab(event, 'data-analysis')">2. Análise de Dados</button>
+        <button class="tab-button" onclick="openTab(event, 'storytelling')">3. Storytelling</button>
+        <button class="tab-button" onclick="openTab(event, 'design')">4. Automação de Design</button>
+        <button class="tab-button" onclick="openTab(event, 'review')">5. Revisão e Otimização</button>
+    </div>
+    
+    <!-- ABA 1 (HOME) -->
+    <div id="home" class="tab-content active">
+        <h2>Etapas da construção de apresentação e guia de orientação de ferramentas e prompt</h2>
+        <p>Assim como a construção de uma apresentação é realizada em etapas, seja ela um plano de comunicação, uma proposta de ação, o mesmo deve acontecer para a automatização de seu processo com a IA. Portanto, neste documento, fornecemos um passo a passo geral para cada etapa desta construção, com ferramentas que vão otimizar o tempo de trabalho de ponta a ponta, deixando o especialista muito mais focado na análise crítica e na modelagem.</p>
+    </div>
+    
+    <!-- ABA 2 (LEVANTAMENTO INICIAL) -->
+    <div id="desk-research" class="tab-content">
+        <h2>1. Levantamento Inicial / Desk Research / Benchmark</h2>
+        <p><strong>Objetivo:</strong> Coletar informações relevantes para o tema da apresentação de forma automatizada.</p>
+        
+        <h3>Ferramentas Utilizadas:</h3>
+        <p>ChatGPT/Gemini/Perplexity: Para desk research automatizada sobre o tema da apresentação.</p>
+        
+        <h3>Fluxo de Trabalho:</h3>
+        <ul>
+            <li>Utilizar ChatGPT/Gemini/Perplexity para perguntas direcionadas sobre o tema, gerando um relatório inicial com insights.</li>
+            <li>Com os insights de iA, fazer a checagem manual de fontes e leitura minuciosa para seleção de insights e cases</li>
+        </ul>
+        
+        <button class="prompt-button" onclick="openModal('desk-research-modal')">Ver Prompt para Desk Research</button>
+        
+        <!-- Modal para o prompt -->
+        <div id="desk-research-modal" class="modal">
+            <div class="modal-content">
+                <span class="close" onclick="closeModal('desk-research-modal')">&times;</span>
+                <h2>Prompt Geral para Desk Research: Projeto de Comunicação Multifacetado & Persona Especialista</h2>
+                
+                <h3>Objetivo Geral:</h3>
+                <p>Realizar uma pesquisa abrangente para fornecer insights valiosos para o planejamento e execução de um projeto de comunicação multifacetado, considerando as melhores práticas, tendências de mercado e o perfil de um especialista em comunicação com habilidades em PR, assessoria de imprensa, influenciadores, digital, criação/publicidade e copywriting, análise de dados e inovação.</p>
+                
+                <h3>Persona Alvo (Especialista em Comunicação Multifacetada):</h3>
+                <p><strong>Nome:</strong> (Deixe em branco para generalizar a pesquisa, ou insira um nome fictício para criar um foco mais tangível)</p>
+                <p><strong>Experiência:</strong> Profissional com vasta experiência em comunicação, com expertise em PR, assessoria de imprensa, marketing de influência, comunicação digital (redes sociais, conteúdo, SEO, etc.), criação/publicidade, copywriting, análise de dados e inovação em comunicação.</p>
+                
+                <h3>Habilidades:</h3>
+                <ul>
+                    <li>Domínio das ferramentas e plataformas de comunicação digital.</li>
+                    <li>Excelente capacidade de relacionamento com a mídia e influenciadores.</li>
+                    <li>Forte habilidade analítica para interpretar dados e métricas de comunicação.</li>
+                    <li>Visão estratégica para desenvolver e implementar planos de comunicação eficazes.</li>
+                    <li>Capacidade de identificar e implementar soluções inovadoras em comunicação.</li>
+                    <li>Habilidade de se manter atualizado com as últimas tendências e tecnologias do mercado.</li>
+                    <li>Conhecimento em criação/publicidade, incluindo conceitos de design, direção de arte, produção audiovisual e storytelling.</li>
+                    <li>Domínio das técnicas de copywriting para diferentes plataformas e formatos (anúncios, posts, e-mails, landing pages, etc.).</li>
+                    <li>Proficiência em análise de dados qualitativos e quantitativos.</li>
+                    <li>Habilidade em identificar padrões, tendências e insights em grandes volumes de dados.</li>
+                    <li>Capacidade de transformar dados brutos em informações acionáveis para o planejamento estratégico de comunicação.</li>
+                </ul>
+                
+                <h3>Necessidades:</h3>
+                <p>Um processo sistemático para revisar e otimizar a linguagem do conteúdo da apresentação, garantindo a correção gramatical, a clareza da mensagem e o impacto da narrativa.</p>
+                
+                <h3>Etapas da Revisão e Otimização da Linguagem:</h3>
+                
+                <h4>Leitura Atenta e Detalhada:</h4>
+                <ul>
+                    <li>Leia todo o conteúdo da apresentação com atenção, buscando identificar erros de gramática, ortografia, sintaxe e pontuação.</li>
+                    <li>Preste atenção à fluidez do texto e à coerência das ideias.</li>
+                    <li>Identifique frases ambíguas, redundantes ou confusas.</li>
+                </ul>
+                
+                <h4>Verificação da Correção Gramatical:</h4>
+                <ul>
+                    <li>Utilize ferramentas de correção gramatical e ortográfica (ex: revisores online, dicionários, gramáticas) para identificar e corrigir erros.</li>
+                    <li>Verifique a concordância verbal e nominal, a regência verbal e nominal, a colocação pronominal e o uso correto da crase.</li>
+                    <li>Preste atenção ao uso correto das conjunções, preposições e advérbios.</li>
+                </ul>
+                
+                <h4>Otimização da Clareza e Objetividade:</h4>
+                <ul>
+                    <li>Elimine frases longas e complexas, substituindo-as por frases mais curtas e simples.</li>
+                    <li>Evite o uso de jargões, termos técnicos e estrangeirismos que não sejam compreendidos pelo público-alvo.</li>
+                    <li>Utilize uma linguagem direta e objetiva, evitando rodeios e ambiguidades.</li>
+                    <li>Priorize a mensagem principal da apresentação, eliminando informações desnecessárias ou irrelevantes.</li>
+                </ul>
+                
+                <h4>Adaptação da Linguagem ao Público-Alvo:</h4>
+                <ul>
+                    <li>Considere o nível de conhecimento e o perfil do público-alvo ao escolher a linguagem a ser utilizada.</li>
+                    <li>Utilize uma linguagem formal ou informal, dependendo do contexto da apresentação e do relacionamento com o público-alvo.</li>
+                    <li>Evite o uso de termos ofensivos, preconceituosos ou discriminatórios.</li>
+                </ul>
+                
+                <h4>Verificação da Coerência e Coesão:</h4>
+                <ul>
+                    <li>Verifique se as ideias apresentadas na apresentação estão organizadas de forma lógica e coerente.</li>
+                    <li>Utilize conectivos (ex: conjunções, preposições, advérbios) para estabelecer relações entre as frases e os parágrafos.</li>
+                    <li>Garanta que a narrativa flua de forma suave e natural, sem interrupções ou descontinuidades.</li>
+                </ul>
+                
+                <h4>Revisão da Narrativa:</h4>
+                <ul>
+                    <li>Certifique-se de que a narrativa da apresentação esteja envolvente, persuasiva e alinhada com os objetivos do projeto de comunicação.</li>
+                    <li>Verifique se a narrativa está adaptada ao público-alvo e ao contexto da apresentação.</li>
+                    <li>Garanta que a narrativa transmita a mensagem principal de forma clara e impactante.</li>
+                </ul>
+                
+                <h4>Leitura em Voz Alta:</h4>
+                <ul>
+                    <li>Leia a apresentação em voz alta para identificar problemas de ritmo, entonação e pronúncia.</li>
+                    <li>Preste atenção à sonoridade das palavras e à fluidez das frases.</li>
+                    <li>Faça ajustes na linguagem para tornar a apresentação mais agradável de ouvir.</li>
+                </ul>
+                
+                <h4>Revisão por Pares:</h4>
+                <ul>
+                    <li>Peça a um colega ou amigo para revisar a apresentação e fornecer feedback sobre a linguagem.</li>
+                    <li>Considere o feedback recebido e faça ajustes na apresentação conforme necessário.</li>
+                </ul>
+                
+                <h3>Ferramentas de Revisão e Otimização da Linguagem:</h3>
+                <ul>
+                    <li>Revisores Gramaticais e Ortográficos (ex: LanguageTool, Grammarly)</li>
+                    <li>Dicionários (ex: Michaelis, Aurélio)</li>
+                    <li>Gramáticas da Língua Portuguesa</li>
+                    <li>Ferramentas de Análise de Legibilidade (ex: Hemingway Editor)</li>
+                    <li>Tesauros (para encontrar sinônimos e antônimos)</li>
+                </ul>
+                
+                <h3>Entregáveis:</h3>
+                <ul>
+                    <li><strong>Documento da Apresentação Revisado e Otimizado:</strong> Uma versão final da apresentação, com todos os erros de linguagem corrigidos e a linguagem otimizada para clareza, objetividade e impacto.</li>
+                    <li><strong>Lista de Verificação da Revisão da Linguagem:</strong> Uma lista de verificação detalhada dos passos seguidos durante a revisão e otimização da linguagem.</li>
+                </ul>
+                
+                <h3>Considerações Finais:</h3>
+                <ul>
+                    <li>Adapte este prompt às necessidades específicas do seu projeto de comunicação.</li>
+                    <li>Dedique tempo suficiente para revisar e otimizar a linguagem da apresentação.</li>
+                    <li>Utilize as ferramentas de revisão e otimização da linguagem de forma eficaz.</li>
+                    <li>Peça feedback a outras pessoas para garantir que a linguagem esteja clara, objetiva e correta.</li>
+                    <li>Mantenha o foco na persona do especialista em comunicação multifacetada ao revisar a linguagem e garantir que ela esteja alinhada com a estratégia geral de comunicação.</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    
+    <!-- ABA 3 (ANÁLISE DE DADOS) -->
+    <div id="data-analysis" class="tab-content">
+        <h2>2. Análise e Processamento de Dados</h2>
+        <p><strong>Objetivo:</strong> Processar e analisar dados coletados para obter insights, fortalecer conceitos, etc.</p>
+        
+        <h3>Ferramentas Utilizadas:</h3>
+        <p>ChatGPT, Gemini, Claude: Para análise de dados complexos e geração automática de gráficos.</p>
+        
+        <h3>Fluxo de Trabalho:</h3>
+        <ul>
+            <li>Usar as ferramentas de iA para ajudar a classificar, gerar insights, comparar informações, gerar recomendações, comprovar teses, etc.</li>
+            <li>Utilizar os insights gerados para a construção da apresentação</li>
+        </ul>
+        
+        <button class="prompt-button" onclick="openModal('data-analysis-modal')">Ver Prompt para Análise de Dados</button>
+        
+        <!-- Modal para o prompt -->
+        <div id="data-analysis-modal" class="modal">
+            <div class="modal-content">
+                <span class="close" onclick="closeModal('data-analysis-modal')">&times;</span>
+                <h2>Prompt Geral para Análise de Dados: Projeto de Comunicação Multifacetado & Persona Especialista</h2>
+                
+                <h3>Objetivo Geral:</h3>
+                <p>Realizar uma análise abrangente de dados (estruturados e não estruturados) para fornecer insights acionáveis e construir um embasamento sólido para o planejamento e execução de um projeto de comunicação multifacetado, considerando as habilidades de um especialista em comunicação com expertise em PR, assessoria de imprensa, marketing de influência, digital, criação/publicidade, copywriting, análise de dados e inovação.</p>
+                
+                <h3>Persona Alvo (Especialista em Comunicação Multifacetada):</h3>
+                <p><strong>Nome:</strong> (Deixe em branco para generalizar a análise, ou insira um nome fictício para criar um foco mais tangível)</p>
+                <p><strong>Experiência:</strong> Profissional com vasta experiência em comunicação, com expertise em PR, assessoria de imprensa, marketing de influência, comunicação digital (redes sociais, conteúdo, SEO, etc.), criação/publicidade, copywriting, análise de dados e inovação em comunicação.</p>
+                
+                <h3>Habilidades:</h3>
+                <ul>
+                    <li>Domínio das ferramentas e plataformas de comunicação digital.</li>
+                    <li>Excelente capacidade de relacionamento com a mídia e influenciadores.</li>
+                    <li>Forte habilidade analítica para interpretar dados e métricas de comunicação.</li>
+                    <li>Visão estratégica para desenvolver e implementar planos de comunicação eficazes.</li>
+                    <li>Capacidade de identificar e implementar soluções inovadoras em comunicação.</li>
+                    <li>Habilidade de se manter atualizado com as últimas tendências e tecnologias do mercado.</li>
+                    <li>Conhecimento em criação/publicidade, incluindo conceitos de design, direção de arte, produção audiovisual e storytelling.</li>
+                    <li>Domínio das técnicas de copywriting para diferentes plataformas e formatos (anúncios, posts, e-mails, landing pages, etc.).</li>
+                    <li>Proficiência em análise de dados qualitativos e quantitativos, utilizando ferramentas como Google Analytics, plataformas de social listening, softwares de análise de texto, etc.</li>
+                    <li>Habilidade em identificar padrões, tendências e insights em grandes volumes de dados.</li>
+                    <li>Capacidade de transformar dados brutos em informações acionáveis para o planejamento estratégico de comunicação.</li>
+                </ul>
+                
+                <h3>Necessidades:</h3>
+                <p>Ferramentas e técnicas eficazes para analisar dados de diversas fontes, identificar insights relevantes para o projeto de comunicação e construir um embasamento sólido para a tomada de decisões estratégicas.</p>
+                
+                <h3>Tipos de Dados a Serem Analisados:</h3>
+                
+                <h4>Dados Fornecidos pelo Cliente:</h4>
+                <ul>
+                    <li>Dados de vendas e marketing.</li>
+                    <li>Dados de CRM (Customer Relationship Management).</li>
+                    <li>Pesquisas de satisfação do cliente.</li>
+                    <li>Relatórios de desempenho de campanhas anteriores.</li>
+                    <li>Informações sobre o público-alvo.</li>
+                    <li>Documentos internos (relatórios, apresentações, etc.).</li>
+                </ul>
+                
+                <h4>Dados de Pesquisas:</h4>
+                <ul>
+                    <li>Pesquisas de mercado.</li>
+                    <li>Pesquisas de opinião pública.</li>
+                    <li>Pesquisas de imagem e reputação da marca.</li>
+                    <li>Pesquisas de comportamento do consumidor.</li>
+                </ul>
+                
+                <h4>Dados de Mídias Sociais:</h4>
+                <ul>
+                    <li>Dados de engajamento (curtidas, comentários, compartilhamentos).</li>
+                    <li>Dados demográficos dos seguidores.</li>
+                    <li>Dados de alcance e impressões.</li>
+                    <li>Dados de tráfego gerado pelas redes sociais.</li>
+                    <li>Dados de social listening (menções da marca, sentimentos, tendências).</li>
+                </ul>
+                
+                <h4>Dados de Web Analytics:</h4>
+                <ul>
+                    <li>Dados de tráfego do site.</li>
+                    <li>Dados de comportamento do usuário no site (páginas visitadas, tempo de permanência, taxa de rejeição).</li>
+                    <li>Dados de conversão (leads, vendas, etc.).</li>
+                    <li>Dados de SEO (palavras-chave, ranqueamento nos resultados de pesquisa).</li>
+                </ul>
+                
+                <h4>Dados de Assessoria de Imprensa:</h4>
+                <ul>
+                    <li>Clipping (menções da marca na mídia).</li>
+                    <li>Análise do tom das notícias.</li>
+                    <li>Alcance e impacto das notícias.</li>
+                    <li>Análise da cobertura da concorrência.</li>
+                </ul>
+                
+                <h4>Dados de Marketing de Influência:</h4>
+                <ul>
+                    <li>Dados de alcance e engajamento dos influenciadores.</li>
+                    <li>Dados de tráfego gerado pelos influenciadores.</li>
+                    <li>Dados de conversão gerados pelos influenciadores.</li>
+                    <li>Análise do sentimento em relação à marca nos posts dos influenciadores.</li>
+                </ul>
+                
+                <h4>Dados Não Estruturados:</h4>
+                <ul>
+                    <li>Transcrições de entrevistas com clientes ou especialistas.</li>
+                    <li>Comentários em redes sociais e fóruns online.</li>
+                    <li>Avaliações de produtos e serviços.</li>
+                    <li>E-mails e mensagens de atendimento ao cliente.</li>
+                </ul>
+                
+                <h3>Tipos de Análise a Serem Realizadas:</h3>
+                
+                <h4>Análise de Sentimento:</h4>
+                <ul>
+                    <li>Classificar o sentimento geral em relação à marca, produtos ou serviços (positivo, negativo, neutro).</li>
+                    <li>Identificar os principais drivers de sentimento (o que está gerando sentimentos positivos e negativos).</li>
+                    <li>Analisar o sentimento em diferentes plataformas e canais.</li>
+                    <li>Identificar nuances de sentimento (sarcasmo, ironia, etc.).</li>
+                </ul>
+                
+                <h4>Análise de Tendências:</h4>
+                <ul>
+                    <li>Identificar tendências emergentes no mercado e no comportamento do consumidor.</li>
+                    <li>Analisar o desempenho das campanhas de comunicação ao longo do tempo.</li>
+                    <li>Identificar padrões de engajamento nas redes sociais.</li>
+                    <li>Prever o impacto de futuras campanhas de comunicação.</li>
+                </ul>
+                
+                <h4>Análise de Conteúdo:</h4>
+                <ul>
+                    <li>Identificar os temas mais relevantes para o público-alvo.</li>
+                    <li>Analisar o desempenho de diferentes tipos de conteúdo.</li>
+                    <li>Identificar lacunas no conteúdo existente.</li>
+                    <li>Otimizar o conteúdo para SEO.</li>
+                </ul>
+                
+                <h4>Análise de Redes Sociais:</h4>
+                <ul>
+                    <li>Identificar os principais influenciadores e líderes de opinião.</li>
+                    <li>Analisar o alcance e o impacto das mensagens nas redes sociais.</li>
+                    <li>Monitorar as conversas e tendências nas redes sociais.</li>
+                    <li>Identificar oportunidades de engajamento nas redes sociais.</li>
+                </ul>
+                
+                <h4>Análise de Dados Demográficos:</h4>
+                <ul>
+                    <li>Identificar as características demográficas do público-alvo.</li>
+                    <li>Segmentar o público-alvo com base em dados demográficos.</li>
+                    <li>Personalizar as mensagens de comunicação para diferentes segmentos do público-alvo.</li>
+                </ul>
+                
+                <h4>Análise de Dados de Conversão:</h4>
+                <ul>
+                    <li>Identificar os canais de comunicação mais eficazes para gerar conversões.</li>
+                    <li>Otimizar as campanhas de comunicação para aumentar as conversões.</li>
+                    <li>Medir o ROI das campanhas de comunicação.</li>
+                </ul>
+                
+                <h4>Análise de Padrões em Documentos/Entrevistas:</h4>
+                <ul>
+                    <li>Identificar temas recorrentes em documentos e entrevistas.</li>
+                    <li>Extrair insights relevantes para o projeto de comunicação.</li>
+                    <li>Identificar oportunidades de storytelling.</li>
+                </ul>
+                
+                <h4>Análise da Concorrência:</h4>
+                <ul>
+                    <li>Analisar as estratégias de comunicação da concorrência.</li>
+                    <li>Identificar os pontos fortes e fracos da concorrência.</li>
+                    <li>Identificar oportunidades para se diferenciar da concorrência.</li>
+                </ul>
+                
+                <h3>Ferramentas de Análise de Dados:</h3>
+                <ul>
+                    <li>Google Analytics</li>
+                    <li>Google Search Console</li>
+                    <li>Plataformas de Social Listening (ex: Brandwatch, Meltwater, Sprinklr)</li>
+                    <li>Ferramentas de Análise de Texto (ex: MonkeyLearn, MeaningCloud)</li>
+                    <li>Ferramentas de Visualização de Dados (ex: Tableau, Power BI)</li>
+                    <li>Software de Planilha (ex: Excel, Google Sheets)</li>
+                    <li>Ferramentas de SEO (ex: SEMrush, Ahrefs)</li>
+                    <li>Ferramentas de CRM (se aplicável)</li>
+                </ul>
+                
+                <h3>Entregáveis:</h3>
+                <ul>
+                    <li><strong>Relatório Detalhado de Análise de Dados:</strong> Um relatório completo com os resultados da análise, incluindo insights, tendências, padrões e recomendações.</li>
+                    <li><strong>Visualizações de Dados:</strong> Gráficos, tabelas e dashboards para apresentar os resultados da análise de forma clara e concisa.</li>
+                    <li><strong>Resumo Executivo:</strong> Um resumo dos principais achados da análise e suas implicações para o projeto de comunicação.</li>
+                    <li><strong>Recomendações Estratégicas:</strong> Recomendações específicas para o planejamento e execução do projeto de comunicação, com base nos insights da análise de dados.</li>
+                    <li><strong>Bases de Dados Limpas e Organizadas:</strong> As bases de dados utilizadas na análise, devidamente limpas e organizadas para facilitar o acesso e a reutilização dos dados.</li>
+                </ul>
+                
+                <h3>Considerações Finais:</h3>
+                <ul>
+                    <li>Adapte este prompt às necessidades específicas do seu projeto de comunicação e aos dados disponíveis.</li>
+                    <li>Priorize a análise de dados que sejam relevantes para os objetivos do projeto de comunicação.</li>
+                    <li>Utilize as ferramentas de análise de dados de forma eficaz para obter insights valiosos.</li>
+                    <li>Apresente os resultados da análise de dados de forma clara e concisa, utilizando visualizações de dados sempre que possível.</li>
+                    <li>Transforme os insights da análise de dados em recomendações estratégicas para o planejamento e execução do projeto de comunicação.</li>
+                    <li>Mantenha o foco na persona do especialista em comunicação multifacetada ao interpretar os resultados da análise de dados e formular as recomendações.</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    
+    <!-- ABA 4 (STORYTELLING) -->
+    <div id="storytelling" class="tab-content">
+        <h2>3. Criação do Storytelling</h2>
+        <p><strong>Objetivo:</strong> Desenvolver uma narrativa estruturada e direcionada ao público-alvo.</p>
+        
+        <h3>Ferramentas Utilizadas:</h3>
+        <p>ChatGPT/Gemini/Jasper AI: Para estruturar a narrativa com base nos insights coletados.</p>
+        
+        <h3>Fluxo de Trabalho:</h3>
+        <ul>
+            <li>Alimentar IA com todas as informações coletadas nas etapas anteriores do projeto (desk research e análise de dados).</li>
+            <li>Ajustar o tom e a abordagem da mensagem conforme o público-alvo e o objetivo da apresentação.</li>
+        </ul>
+        
+        <button class="prompt-button" onclick="openModal('storytelling-modal')">Ver Prompt para Desenvolvimento de Narrativa</button>
+        
+        <!-- Modal para o prompt -->
+        <div id="storytelling-modal" class="modal">
+            <div class="modal-content">
+                <span class="close" onclick="closeModal('storytelling-modal')">&times;</span>
+                <h2>Prompt para Desenvolvimento de Narrativa Estruturada: Projeto de Comunicação Multifacetado & Persona Especialista</h2>
+                
+                <h3>Objetivo Geral:</h3>
+                <p>Desenvolver uma narrativa estruturada e envolvente, direcionada ao público-alvo, a partir dos insights coletados nas etapas de desk research e análise de dados, com o objetivo de construir uma história impactante que atinja os objetivos específicos do projeto de comunicação e da apresentação.</p>
+                
+                <h3>Persona Alvo (Especialista em Comunicação Multifacetada):</h3>
+                <p><strong>Nome:</strong> (Deixe em branco para generalizar o processo, ou insira um nome fictício para criar um foco mais tangível)</p>
+                <p><strong>Experiência:</strong> Profissional com vasta experiência em comunicação, com expertise em PR, assessoria de imprensa, marketing de influência, digital, criação/publicidade, copywriting, análise de dados e inovação em comunicação.</p>
+                
+                <h3>Habilidades:</h3>
+                <ul>
+                    <li>Domínio das ferramentas e plataformas de comunicação digital.</li>
+                    <li>Excelente capacidade de relacionamento com a mídia e influenciadores.</li>
+                    <li>Forte habilidade analítica para interpretar dados e métricas de comunicação.</li>
+                    <li>Visão estratégica para desenvolver e implementar planos de comunicação eficazes.</li>
+                    <li>Capacidade de identificar e implementar soluções inovadoras em comunicação.</li>
+                    <li>Habilidade de se manter atualizado com as últimas tendências e tecnologias do mercado.</li>
+                    <li>Conhecimento em criação/publicidade, incluindo conceitos de design, direção de arte, produção audiovisual e storytelling.</li>
+                    <li>Domínio das técnicas de copywriting para diferentes plataformas e formatos (anúncios, posts, e-mails, landing pages, etc.).</li>
+                </ul>
+                
+                <h3>Necessidades:</h3>
+                <p>Um processo estruturado para transformar insights de pesquisa e dados em uma narrativa coerente e impactante, que atinja os objetivos de comunicação e engaje o público-alvo.</p>
+                
+                <h3>Etapas do Desenvolvimento da Narrativa:</h3>
+                
+                <h4>Definição do Público-Alvo:</h4>
+                <ul>
+                    <li>Com base nos dados coletados, defina o público-alvo principal da narrativa.</li>
+                    <li>Crie personas detalhadas do público-alvo, incluindo seus dados demográficos, interesses, necessidades, dores e aspirações.</li>
+                    <li>Identifique os canais de comunicação mais eficazes para alcançar o público-alvo.</li>
+                </ul>
+                
+                <h4>Definição dos Objetivos da Narrativa:</h4>
+                <ul>
+                    <li>Quais são os objetivos específicos que a narrativa deve alcançar? (ex: aumentar o conhecimento da marca, gerar leads, aumentar as vendas, mudar a percepção pública, etc.)</li>
+                    <li>Qual é a mensagem principal que a narrativa deve transmitir?</li>
+                    <li>Qual é o call to action que a narrativa deve inspirar?</li>
+                </ul>
+                
+                <h4>Identificação dos Insights Chave:</h4>
+                <ul>
+                    <li>Revise os resultados da desk research e da análise de dados.</li>
+                    <li>Identifique os insights mais relevantes para o público-alvo e para os objetivos da narrativa.</li>
+                    <li>Priorize os insights que sejam mais impactantes e que gerem maior ressonância com o público-alvo.</li>
+                </ul>
+                
+                <h4>Estrutura da Narrativa:</h4>
+                <ul>
+                    <li>Defina a estrutura básica da narrativa, utilizando um modelo de storytelling comprovado (ex: Jornada do Herói, Estrutura de Três Atos, etc.).</li>
+                    <li>Crie um arco narrativo que envolva o público-alvo e o mantenha engajado do início ao fim.</li>
+                    <li>Defina os personagens principais da narrativa (podem ser personagens reais ou fictícios).</li>
+                    <li>Crie um conflito central que impulsione a narrativa.</li>
+                    <li>Defina a resolução do conflito e a mensagem final da narrativa.</li>
+                </ul>
+                
+                <h4>Desenvolvimento do Conteúdo da Narrativa:</h4>
+                <ul>
+                    <li>Crie um roteiro detalhado da narrativa, incluindo diálogos, descrições e elementos visuais.</li>
+                    <li>Utilize técnicas de copywriting para criar um texto persuasivo e envolvente.</li>
+                    <li>Incorpore elementos visuais (imagens, vídeos, gráficos) para tornar a narrativa mais impactante.</li>
+                    <li>Utilize dados e estatísticas para dar credibilidade à narrativa.</li>
+                    <li>Incorpore depoimentos de clientes, especialistas ou influenciadores para fortalecer a narrativa.</li>
+                </ul>
+                
+                <h4>Adaptação da Narrativa aos Diferentes Canais:</h4>
+                <ul>
+                    <li>Adapte a narrativa aos diferentes canais de comunicação (redes sociais, site, e-mail, apresentações, etc.).</li>
+                    <li>Otimize o conteúdo da narrativa para cada canal, levando em consideração as características e o público de cada canal.</li>
+                    <li>Utilize diferentes formatos de conteúdo para cada canal (vídeos curtos, posts de blog, infográficos, etc.).</li>
+                </ul>
+                
+                <h4>Teste e Otimização da Narrativa:</h4>
+                <ul>
+                    <li>Teste a narrativa com um grupo de pessoas que representem o público-alvo.</li>
+                    <li>Colete feedback sobre a narrativa e identifique áreas de melhoria.</li>
+                    <li>Otimize a narrativa com base no feedback coletado.</li>
+                    <li>Monitore o desempenho da narrativa nos diferentes canais de comunicação e faça ajustes conforme necessário.</li>
+                </ul>
+                
+                <h3>Elementos Chave da Narrativa:</h3>
+                <ul>
+                    <li><strong>Clareza:</strong> A narrativa deve ser clara e fácil de entender.</li>
+                    <li><strong>Relevância:</strong> A narrativa deve ser relevante para o público-alvo.</li>
+                    <li><strong>Autenticidade:</strong> A narrativa deve ser autêntica e genuína.</li>
+                    <li><strong>Emoção:</strong> A narrativa deve evocar emoções no público-alvo.</li>
+                    <li><strong>Credibilidade:</strong> A narrativa deve ser credível e baseada em fatos.</li>
+                    <li><strong>Persuasão:</strong> A narrativa deve ser persuasiva e inspirar o público-alvo a agir.</li>
+                    <li><strong>Memorabilidade:</strong> A narrativa deve ser memorável e deixar uma impressão duradoura no público-alvo.</li>
+                </ul>
+                
+                <h3>Ferramentas de Storytelling:</h3>
+                <ul>
+                    <li>Modelos de Storytelling (Jornada do Herói, Estrutura de Três Atos, etc.)</li>
+                    <li>Técnicas de Copywriting</li>
+                    <li>Ferramentas de Design Gráfico</li>
+                    <li>Ferramentas de Edição de Vídeo</li>
+                    <li>Ferramentas de Apresentação (PowerPoint, Keynote, Google Slides)</li>
+                </ul>
+                
+                <h3>Entregáveis:</h3>
+                <ul>
+                    <li><strong>Documento de Estratégia de Narrativa:</strong> Um documento detalhado que descreve o público-alvo, os objetivos da narrativa, os insights chave, a estrutura da narrativa e o plano de implementação.</li>
+                    <li><strong>Roteiro da Narrativa:</strong> Um roteiro detalhado da narrativa, incluindo diálogos, descrições e elementos visuais.</li>
+                    <li><strong>Conteúdo da Narrativa:</strong> O conteúdo da narrativa adaptado para os diferentes canais de comunicação.</li>
+                    <li><strong>Apresentação da Narrativa:</strong> Uma apresentação visualmente atraente da narrativa, para ser utilizada em apresentações e reuniões.</li>
+                </ul>
+                
+                <h3>Considerações Finais:</h3>
+                <ul>
+                    <li>Adapte este prompt às necessidades específicas do seu projeto de comunicação.</li>
+                    <li>Mantenha o foco no público-alvo ao desenvolver a narrativa.</li>
+                    <li>Utilize os insights da pesquisa e da análise de dados para criar uma narrativa relevante e impactante.</li>
+                    <li>Seja criativo e explore diferentes abordagens de storytelling.</li>
+                    <li>Teste e otimize a narrativa para garantir que ela atinja os objetivos desejados.</li>
+                    <li>Mantenha o foco na persona do especialista em comunicação multifacetada ao desenvolver a narrativa e garantir que ela esteja alinhada com a estratégia geral de comunicação.</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    
+    <!-- ABA 5 (AUTOMAÇÃO DE DESIGN) -->
+    <div id="design" class="tab-content">
+        <h2>4. Automação do Design</h2>
+        <p><strong>Objetivo:</strong> Automatizar o design dos slides, garantindo um visual atraente e consistente.</p>
+        
+        <h3>Ferramentas Utilizadas:</h3>
+        <p>Gamma.app ou Canva Docs: Geração automática de slides a partir do texto e dados fornecidos.</p>
+        
+        <h3>Fluxo de Trabalho:</h3>
+        <ul>
+            <li>Importar o storytelling estruturado e os gráficos gerados para o Canva.app ou Canva Docs.</li>
+            <li>Explorar templates padronizados e adaptá-los automaticamente para diferentes tipos de apresentações (balanços, cases, planos de comunicação, novos projetos, etc.).</li>
+        </ul>
+        
+        <div class="steps-container">
+            <h3>Instruções para Criação Visual de Apresentações</h3>
+            <div class="step">
+                <h4>Avaliação do Conteúdo</h4>
+                <p>Após a conclusão do desenvolvimento do conteúdo da apresentação, proceda-se à etapa de criação visual. Nesta fase, é imprescindível realizar uma análise criteriosa da relevância do conteúdo gerado, determinando se a apresentação em questão necessita de atenção profissional especializada por parte de um designer (especialmente em casos de apresentações com estrutura narrativa complexa), ou se destina-se a relatórios rotineiros que podem utilizar layouts padronizados.</p>
+            </div>
+            
+            <h3>Procedimentos Recomendados</h3>
+            
+            <div class="tool-buttons">
+                <button id="complex-btn" class="tool-button" onclick="showToolContent('complex')">Para Apresentações de Alta Complexidade</button>
+                <button id="intermediate-btn" class="tool-button" onclick="showToolContent('intermediate')">Para Apresentações de Complexidade Intermediária</button>
+                <button id="standard-btn" class="tool-button" onclick="showToolContent('standard')">Para Apresentações Padronizadas</button>
+            </div>
+            
+            <div id="complex" class="tool-section">
+                <div class="tool-content">
+                    <p>Caso sua apresentação requeira uma elaboração visual sofisticada, recomenda-se solicitar a um profissional de design o desenvolvimento integral dos elementos visuais, ou alternativamente, utilizar como referência o template disponibilizado pela plataforma Canva.</p>
+                    <p><a href="https://www.canva.com/design/DAGiStWJQ8s/mgL1RyvoeVMsa4SqWXonlg/view?utm_content=DAGiStWJQ8s&utm_campaign=designshare&utm_medium=link&utm_source=sharebutton&mode=preview" target="_blank">Use o Template Canva</a></p>
+                </div>
+            </div>
+            
+            <div id="intermediate" class="tool-section">
+                <div class="tool-content">
+                    <p>Na eventualidade de sua apresentação possuir estrutura simplificada, porém demandar intervenção humana para assegurar um resultado de padrão profissional, recomenda-se a utilização do template do Canva como base estrutural. O Canva constitui-se como uma ferramenta de design caracterizada por sua interface intuitiva, que possibilita a criação eficiente de designs e apresentações incorporando elementos gráficos.</p>
+                    <p><a href="https://www.canva.com/design/DAGiStWJQ8s/mgL1RyvoeVMsa4SqWXonlg/view?utm_content=DAGiStWJQ8s&utm_campaign=designshare&utm_medium=link&utm_source=sharebutton&mode=preview" target="_blank">Use o Template Canva</a></p>
+                </div>
+            </div>
+            
+            <div id="standard" class="tool-section">
+                <div class="tool-content">
+                    <p>Caso sua apresentação necessite exclusivamente de um layout padronizado, recomenda-se a utilização da plataforma Gamma para a geração automatizada, via Inteligência Artificial, de todos os elementos visuais da sua apresentação. Após a conclusão do processo de geração automática, faz-se necessária a revisão minuciosa do conteúdo e a substituição das imagens geradas pela ferramenta.</p>
+                    <p><a href="https://gamma.app/themes/share/aq3jc4ny1au4sdd" target="_blank">Use o Template Gamma</a></p>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- ABA 6 (REVISÃO E OTIMIZAÇÃO) -->
+    <div id="review" class="tab-content">
+        <h2>5. Revisão e Otimização</h2>
+        <p><strong>Objetivo:</strong> Garantir clareza, objetividade e correção gramatical.</p>
+        
+        <h3>Ferramentas Utilizadas:</h3>
+        <p>ChatGPT, Gemini, Grammarly e Hemingway: Revisão automatizada de textos e análise de linguagem.</p>
+        
+        <h3>Fluxo de Trabalho:</h3>
+        <ul>
+            <li>Automatizar a revisão de textos com a ferramenta escolhida para correção gramatical.</li>
+        </ul>
+        
+        <button class="prompt-button" onclick="openModal('review-modal')">Ver Prompt para Revisão e Otimização</button>
+        
+        <!-- Modal para o prompt -->
+        <div id="review-modal" class="modal">
+            <div class="modal-content">
+                <span class="close" onclick="closeModal('review-modal')">&times;</span>
+                <h2>Prompt para Revisão e Otimização da Linguagem: Projeto de Comunicação Multifacetado & Persona Especialista</h2>
+                
+                <h3>Objetivo Geral:</h3>
+                <p>Garantir clareza, objetividade e correção gramatical em todo o conteúdo criado para a apresentação do projeto de comunicação, assegurando o primor narrativo sem comprometer a precisão e a qualidade da linguagem.</p>
+                
+                <h3>Persona Alvo (Especialista em Comunicação Multifacetada):</h3>
+                <p><strong>Nome:</strong> (Deixe em branco para generalizar o processo, ou insira um nome fictício para criar um foco mais tangível)</p>
+                <p><strong>Experiência:</strong> Profissional com vasta experiência em comunicação, com expertise em PR, assessoria de imprensa, marketing de influência, digital, criação/publicidade, copywriting, análise de dados e inovação em comunicação.</p>
+                
+                <h3>Habilidades:</h3>
+                <ul>
+                    <li>Domínio das ferramentas e plataformas de comunicação digital.</li>
+                    <li>Excelente capacidade de relacionamento com a mídia e influenciadores.</li>
+                    <li>Forte habilidade analítica para interpretar dados e métricas de comunicação.</li>
+                    <li>Visão estratégica para desenvolver e implementar planos de comunicação eficazes.
+                    <li>Capacidade de adaptar a narrativa aos objetivos específicos do projeto e da apresentação.</li>
+                    <li>Proficiência em gramática, ortografia e normas da língua portuguesa.</li>
+                    <li>Habilidade em identificar e corrigir erros de linguagem, como ambiguidades, redundâncias e imprecisões.</li>
+                    <li>Capacidade de adaptar a linguagem ao público-alvo e ao contexto da apresentação.</li>
+                    <li>Habilidade em garantir a clareza, objetividade e concisão da comunicação.</li>
+                </ul>
+
+                <h3>Necessidades:</h3>
+                <p>Um processo sistemático para revisar e otimizar a linguagem do conteúdo da apresentação, garantindo a correção gramatical, a clareza da mensagem e o impacto da narrativa.</p>
+
+                <h3>Etapas da Revisão e Otimização da Linguagem:</h3>
+
+                <h3>Leitura Atenta e Detalhada:</h3>
+                <ul>
+                    <li>Leia todo o conteúdo da apresentação com atenção, buscando identificar erros de gramática, ortografia, sintaxe e pontuação.</li>
+                    <li>Preste atenção à fluidez do texto e à coerência das ideias.</li>
+                    <li>Identifique frases ambíguas, redundantes ou confusas.</li>
+                </ul>
+
+                <h3>Verificação da Correção Gramatical:</h3>
+                <ul>
+                    <li>Utilize ferramentas de correção gramatical e ortográfica (ex: revisores online, dicionários, gramáticas) para identificar e corrigir erros.</li>
+                    <li>Verifique a concordância verbal e nominal, a regência verbal e nominal, a colocação pronominal e o uso correto da crase.</li>
+                    <li>Preste atenção ao uso correto das conjunções, preposições e advérbios.</li>
+                </ul>
+
+                <h3>Otimização da Clareza e Objetividade:</h3>
+                <ul>
+                    <li>Elimine frases longas e complexas, substituindo-as por frases mais curtas e simples.</li>
+                    <li>Evite o uso de jargões, termos técnicos e estrangeirismos que não sejam compreendidos pelo público-alvo.</li>
+                    <li>Utilize uma linguagem direta e objetiva, evitando rodeios e ambiguidades.</li>
+                    <li>Priorize a mensagem principal da apresentação, eliminando informações desnecessárias ou irrelevantes.</li>
+                </ul>
+
+                <h3>Adaptação da Linguagem ao Público-Alvo:</h3>
+                <ul>
+                    <li>Considere o nível de conhecimento e o perfil do público-alvo ao escolher a linguagem a ser utilizada.</li>
+                    <li>Utilize uma linguagem formal ou informal, dependendo do contexto da apresentação e do relacionamento com o público-alvo.</li>
+                    <li>Evite o uso de termos ofensivos, preconceituosos ou discriminatórios.</li>
+                </ul>
+
+                <h3>Verificação da Coerência e Coesão:</h3>
+                <ul>
+                    <li>Verifique se as ideias apresentadas na apresentação estão organizadas de forma lógica e coerente.</li>
+                    <li>Utilize conectivos (ex: conjunções, preposições, advérbios) para estabelecer relações entre as frases e os parágrafos.</li>
+                    <li>Garanta que a narrativa flua de forma suave e natural, sem interrupções ou descontinuidades.</li>
+                </ul>
+
+                <h3>Revisão da Narrativa:</h3>
+                <ul>
+                    <li>Certifique-se de que a narrativa da apresentação esteja envolvente, persuasiva e alinhada com os objetivos do projeto de comunicação.</li>
+                    <li>Verifique se a narrativa está adaptada ao público-alvo e ao contexto da apresentação.</li>
+                    <li>Garanta que a narrativa transmita a mensagem principal de forma clara e impactante.</li>
+                </ul>
+
+                <h3>Leitura em Voz Alta:</h3>
+                <ul>
+                    <li>Leia a apresentação em voz alta para identificar problemas de ritmo, entonação e pronúncia.</li>
+                    <li>Preste atenção à sonoridade das palavras e à fluidez das frases.</li>
+                    <li>Faça ajustes na linguagem para tornar a apresentação mais agradável de ouvir.</li>
+                </ul>
+
+                <h3>Revisão por Pares:</h3>
+                <ul>
+                    <li>Peça a um colega ou amigo para revisar a apresentação e fornecer feedback sobre a linguagem.</li>
+                    <li>Considere o feedback recebido e faça ajustes na apresentação conforme necessário.</li>
+                </ul>
+
+                <h3>Ferramentas de Revisão e Otimização da Linguagem:</h3>
+                <ul>
+                    <li>Revisores Gramaticais e Ortográficos (ex: LanguageTool, Grammarly)</li>
+                    <li>Dicionários (ex: Michaelis, Aurélio)</li>
+                    <li>Gramáticas da Língua Portuguesa</li>
+                    <li>Ferramentas de Análise de Legibilidade (ex: Hemingway Editor)</li>
+                    <li>Tesauros (para encontrar sinônimos e antônimos)</li>
+                </ul>
+
+                <h3>Entregáveis:</h3>
+                <ul>
+                    <li><strong>Documento da Apresentação Revisado e Otimizado:</strong> Uma versão final da apresentação, com todos os erros de linguagem corrigidos e a linguagem otimizada para clareza, objetividade e impacto.</li>
+                    <li><strong>Lista de Verificação da Revisão da Linguagem:</strong> Uma lista de verificação detalhada dos passos seguidos durante a revisão e otimização da linguagem.</li>
+                </ul>
+
+                <h3>Considerações Finais:</h3>
+                <ul>
+                    <li>Adapte este prompt às necessidades específicas do seu projeto de comunicação e da sua apresentação.</li>
+                    <li>Dedique tempo suficiente para revisar e otimizar a linguagem da apresentação.</li>
+                    <li>Utilize as ferramentas de revisão e otimização da linguagem de forma eficaz.</li>
+                    <li>Peça feedback a outras pessoas para garantir que a linguagem esteja clara, objetiva e correta.</li>
+                    <li>Mantenha o foco na persona do especialista em comunicação multifacetada ao revisar a linguagem e garantir que ela esteja alinhada com a estratégia geral de comunicação.</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Rodapé: posicionado após todas as abas -->
+    <footer>
+        <p>Plataforma Interativa - Automatização de Apresentações de Slides com IA</p>
+        <p>&copy; 2025 Todos os direitos reservados</p>
+    </footer>
+    
+    <script>
+        // Inicializar o conteúdo da ferramenta de design ao carregar a página
+        document.addEventListener('DOMContentLoaded', function() {
+            if (document.getElementById('complex')) {
+                document.getElementById('complex').style.display = 'none';
+                document.getElementById('intermediate').style.display = 'none';
+                document.getElementById('standard').style.display = 'none';
+            }
+        });
+    </script>
+</body>
+</html>
